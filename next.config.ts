@@ -1,9 +1,10 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
+const nextConfig = {
   eslint: {
-    ignoreDuringBuilds: true, // ✅ Disable ESLint check during build
+    ignoreDuringBuilds: true,
+  },
+  experimental: {
+    missingSuspenseWithCSRBailout: false,
   },
 };
 
-export default nextConfig;
+module.exports = nextConfig;
