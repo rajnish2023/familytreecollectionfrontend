@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { Suspense, useState, FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { API_ENDPOINTS } from '@/app/config/api';
 import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from '@/components/icons';
 import { setAuthData } from '@/app/utils/auth';
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -89,7 +89,7 @@ export default function LoginPage() {
               value={formData.email}
               onChange={handleInputChange}
               required
-              className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 shadow-sm focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring placeholder-muted-foreground text-foreground"
+              className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 shadow-sm focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring placeholder-muted-foreground"
               placeholder="info@gmail.com"
             />
           </div>
@@ -106,14 +106,18 @@ export default function LoginPage() {
                 value={formData.password}
                 onChange={handleInputChange}
                 required
-                className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 shadow-sm focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring placeholder-muted-foreground text-foreground"
+                className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 shadow-sm focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring placeholder-muted-foreground"
                 placeholder="Enter your password"
               />
               <span
                 onClick={() => setShowPassword(prev => !prev)}
                 className="absolute z-30 -translate-y-1/2 cursor-pointer right-4 top-1/2 text-muted-foreground hover:text-foreground"
               >
-                {showPassword ? <EyeIcon className="fill-current" /> : <EyeCloseIcon className="fill-current" />}
+                {showPassword ? (
+                  <EyeIcon className="fill-current" />
+                ) : (
+                  <EyeCloseIcon className="fill-current" />
+                )}
               </span>
             </div>
           </div>
@@ -143,5 +147,13 @@ export default function LoginPage() {
         */}
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginForm />
+    </Suspense>
   );
 }
