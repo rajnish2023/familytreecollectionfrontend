@@ -2,10 +2,11 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import Link from "next/link";
+// import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSidebar } from "../../context/SidebarContext";
 import { getAuthData, clearAuthData, setAuthData, authenticatedFetch } from "@/app/utils/auth";
+import { API_ENDPOINTS } from '@/app/config/api';
 import ThemeToggle from "./ThemeToggle";
 
 function ChangeEmailModal({ isOpen, onClose, currentEmail, onEmailChanged }: { isOpen: boolean; onClose: () => void; currentEmail: string; onEmailChanged: (email: string) => void; }) {
@@ -14,6 +15,13 @@ function ChangeEmailModal({ isOpen, onClose, currentEmail, onEmailChanged }: { i
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    if (isOpen) {
+      setEmail(currentEmail || "");
+    }
+  }, [isOpen, currentEmail]);
+
+  
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
@@ -21,7 +29,7 @@ function ChangeEmailModal({ isOpen, onClose, currentEmail, onEmailChanged }: { i
     setLoading(true);
     try {
       // Update email in user and person (single endpoint)
-      const res = await authenticatedFetch("http://localhost:5000/api/auth/change-email", {
+      const res = await authenticatedFetch(API_ENDPOINTS.auth.changeEmail, {
         method: "PUT",
         body: JSON.stringify({ email }),
       });
@@ -29,6 +37,10 @@ function ChangeEmailModal({ isOpen, onClose, currentEmail, onEmailChanged }: { i
       if (!res.ok) throw new Error(data.message || "Failed to update email");
       setSuccess("Email updated successfully");
       onEmailChanged(email);
+      const authData = getAuthData();
+      if (authData) {
+        setAuthData({ ...authData, email });
+      }
       setTimeout(onClose, 1000);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Error updating email");
@@ -77,8 +89,7 @@ function ChangeEmailModal({ isOpen, onClose, currentEmail, onEmailChanged }: { i
             cursor: 'pointer',
             zIndex: 10,
           }}
-          aria-label="Close"
-        >
+          aria-label="Close">
           ×
         </button>
         <h2 style={{ fontWeight: 600, fontSize: 24, marginBottom: 16, color: 'var(--text-primary, #222)', textAlign: 'center' }}>Change Email</h2>
@@ -114,7 +125,7 @@ function ChangePasswordModal({ isOpen, onClose }: { isOpen: boolean; onClose: ()
     }
     setLoading(true);
     try {
-      const res = await authenticatedFetch("http://localhost:5000/api/auth/change-password", {
+      const res = await authenticatedFetch(API_ENDPOINTS.auth.changePassword, {
         method: "PUT",
         body: JSON.stringify({ previousPassword, newPassword, confirmPassword }),
       });
