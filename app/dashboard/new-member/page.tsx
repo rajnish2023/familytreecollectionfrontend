@@ -44,9 +44,6 @@ interface FormData {
   spouse_id: string;
   parent_ids: string[];
   children_ids: string[];
-  father_id: string;
-  mother_id: string;
-  selectedParents: string;
 }
 
 function toTitleCase(text: string): string {
@@ -91,9 +88,6 @@ export default function NewMemberPage() {
     spouse_id: "",
     parent_ids: [],
     children_ids: [],
-    father_id: "",
-    mother_id: "",
-    selectedParents: "",
   });
 
   const resetForm = () => {
@@ -111,9 +105,6 @@ export default function NewMemberPage() {
       spouse_id: "",
       parent_ids: [],
       children_ids: [],
-      father_id: "",
-      mother_id: "",
-      selectedParents: "",
     });
     setUploadedPhotoUrl("");
     setEligibleSpouses([]);
@@ -711,14 +702,19 @@ export default function NewMemberPage() {
           <h2 className="text-lg font-medium text-card-foreground mb-4">Family Relations</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label htmlFor="selectedParents" className="block text-sm font-medium text-foreground">
+              <label htmlFor="Parents" className="block text-sm font-medium text-foreground">
                 Parents
               </label>
               <select
-                id="selectedParents"
-                name="selectedParents"
-                value={formData.selectedParents}
-                onChange={handleChange}
+                id="parent_ids"
+                name="parent_ids"
+                value={formData.parent_ids[0]}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    parent_ids: e.target.value ? [e.target.value] : [],
+                  }))
+                }
                 disabled={isLoadingParents}
                 className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-foreground shadow-sm focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
               >
