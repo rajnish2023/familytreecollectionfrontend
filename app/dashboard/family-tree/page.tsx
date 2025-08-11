@@ -4,6 +4,7 @@ import React, { useEffect, useState, useRef } from "react";
 import Tree from "react-d3-tree";
 import ReactDOM from "react-dom";
 import { authenticatedFetch, canEdit } from "@/app/utils/auth";
+import { API_ENDPOINTS } from '@/app/config/api';
 import EditPersonForm from "@/components/EditPersonForm";
 import { useTheme } from "@/context/ThemeContext";
 
@@ -33,7 +34,7 @@ function toTitleCase(text: string): string {
 
 async function fetchFamilyTree(): Promise<PersonNode[] | null> {
   try {
-    const res = await authenticatedFetch(`http://localhost:5000/api/persons/family-tree`);
+    const res = await authenticatedFetch(API_ENDPOINTS.persons.familyTree);
     if (!res.ok) throw new Error(`Failed to fetch: ${res.status}`);
     const data = await res.json();
     return data.data as PersonNode[];

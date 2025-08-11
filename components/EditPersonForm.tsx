@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { authenticatedFetch } from "@/app/utils/auth";
+import { API_ENDPOINTS } from '@/app/config/api';
 
 type CountryCode = {
   name: string;
@@ -90,7 +91,7 @@ export default function EditPersonForm({ personId, initialData, onSuccess, onCan
 
   const loadPersonData = async () => {
     try {
-      const res = await authenticatedFetch(`http://localhost:5000/api/persons/${personId}`);
+      const res = await authenticatedFetch(API_ENDPOINTS.persons.person(personId));
       const data = await res.json();
       if (data.success) {
         const p = data.data;
@@ -111,7 +112,7 @@ export default function EditPersonForm({ personId, initialData, onSuccess, onCan
         }));
 
         const personGender = p.gender;
-        const spouseRes = await authenticatedFetch(`http://localhost:5000/api/persons/edit-spouses?currentPersonAge=${p.dateOfBirth}&currentPersonGender=${personGender}`);
+        const spouseRes = await authenticatedFetch(API_ENDPOINTS.persons.eligibleSpouses);
         const spouseData = await spouseRes.json();
         let spouses = spouseData.data || [];
         // Ensure current spouse is included in dropdown
@@ -123,7 +124,7 @@ export default function EditPersonForm({ personId, initialData, onSuccess, onCan
         setEligibleSpouses(spouses);
       }
       
-      const parentsRes = await authenticatedFetch(`http://localhost:5000/api/persons/eligible-parents`);
+      const parentsRes = await authenticatedFetch(API_ENDPOINTS.persons.eligibleParents);
       const parentsData = await parentsRes.json();
       setEligibleParents(parentsData.data || []);
     } catch (err) {
@@ -169,7 +170,7 @@ export default function EditPersonForm({ personId, initialData, onSuccess, onCan
       // Fetch previously used occupations from backend
       let previousOccupations: Array<{ title: string; source: string }> = [];
       const previousResponse = await authenticatedFetch(
-        `http://localhost:5000/api/persons/occupations?search=${encodeURIComponent(query)}`
+        `${API_ENDPOINTS.persons.occupations}?search=${encodeURIComponent(query)}`
       );
       if (previousResponse.ok) {
         const data = await previousResponse.json();
@@ -274,7 +275,7 @@ export default function EditPersonForm({ personId, initialData, onSuccess, onCan
         placeOfBirth: toTitleCase(form.placeOfBirth),
         occupation: toTitleCase(form.occupation),
       };
-      const res = await authenticatedFetch(`http://localhost:5000/api/persons/${personId}`, {
+      const res = await authenticatedFetch(API_ENDPOINTS.persons.update(personId), {
         method: "PUT",
         body: JSON.stringify(submitForm),
       });
@@ -295,7 +296,7 @@ export default function EditPersonForm({ personId, initialData, onSuccess, onCan
     try {
       const formData = new FormData();
       formData.append("photo", file);
-      const response = await fetch("http://localhost:5000/api/upload/image", {
+      const response = await fetch(API_ENDPOINTS.upload.image, {
         method: "POST",
         body: formData,
       });
@@ -304,7 +305,7 @@ export default function EditPersonForm({ personId, initialData, onSuccess, onCan
         throw new Error(errorData.message || "Failed to upload image");
       }
       const data = await response.json();
-      const photoUrl = `http://localhost:5000${data.data.fileUrl}`;
+      const photoUrl = `${API_ENDPOINTS.baseUrl}${data.data.fileUrl}`;
       setForm((prev: any) => ({ ...prev, photo: photoUrl }));
     } catch (err: any) {
       setUploadError(err.message || "Failed to upload image");

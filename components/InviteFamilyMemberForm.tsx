@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { authenticatedFetch, getAuthData } from "@/app/utils/auth";
+import { API_ENDPOINTS } from '@/app/config/api';
 import { useTheme } from "@/context/ThemeContext";
 import { EyeIcon, EyeCloseIcon } from "@/components/icons";
 
@@ -10,7 +11,7 @@ interface InviteFamilyMemberFormProps {
   hideTitle?: boolean;
 }
 
-const PERSONS_API = "http://localhost:5000/api/persons";
+const PERSONS_API = API_ENDPOINTS.persons.all;
 
 export default function InviteFamilyMemberForm({ onSuccess, hideTitle }: InviteFamilyMemberFormProps) {
   const { theme } = useTheme();
@@ -63,7 +64,7 @@ export default function InviteFamilyMemberForm({ onSuccess, hideTitle }: InviteF
     }
     try {
       // 1. Create user
-      const userRes = await fetch("http://localhost:5000/api/auth/signup", {
+      const userRes = await fetch(API_ENDPOINTS.auth.signup, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -81,13 +82,13 @@ export default function InviteFamilyMemberForm({ onSuccess, hideTitle }: InviteF
         return;
       }
       // 2. Create person profile (if not already exists)
-      await authenticatedFetch("http://localhost:5000/api/persons", {
-        method: "POST",
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-        }),
-      });
+      // await authenticatedFetch(API_ENDPOINTS.persons.create, {
+      //   method: "POST",
+      //   body: JSON.stringify({
+      //     name: formData.name,
+      //     email: formData.email,
+      //   }),
+      // });
       setIsLoading(false);
       if (onSuccess) onSuccess(formData.email);
       setFormData({ name: "", email: "", password: "", confirmPassword: "", role: "viewer" });

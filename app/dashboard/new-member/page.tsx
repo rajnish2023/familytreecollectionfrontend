@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { authenticatedFetch, canEdit } from "@/app/utils/auth";
+import { API_ENDPOINTS } from '@/app/config/api';
 import { useTheme } from "@/context/ThemeContext";
 // import LocationInput from "../../../components/LocationInput";
 
@@ -188,7 +189,7 @@ export default function NewMemberPage() {
     try {
       setIsLoadingSpouses(true);
       const response = await authenticatedFetch(
-        `http://localhost:5000/api/persons/eligible-spouses?currentPersonAge=${formData.dateOfBirth}&currentPersonGender=${formData.gender}`
+        `${API_ENDPOINTS.persons.eligibleSpouses}?currentPersonAge=${formData.dateOfBirth}&currentPersonGender=${formData.gender}`
       );
       if (!response.ok) throw new Error("Failed to fetch eligible spouses");
       const data = await response.json();
@@ -204,7 +205,7 @@ export default function NewMemberPage() {
   const fetchEligibleParents = async () => {
     try {
       setIsLoadingParents(true);
-      const response = await authenticatedFetch("http://localhost:5000/api/persons/eligible-parents");
+      const response = await authenticatedFetch(API_ENDPOINTS.persons.eligibleParents);
       if (!response.ok) throw new Error("Failed to fetch eligible parents");
       const data = await response.json();
       setEligibleParents(data.data || []);
@@ -246,7 +247,7 @@ export default function NewMemberPage() {
       
       // First, search in previously used occupations
       const response = await authenticatedFetch(
-        `http://localhost:5000/api/persons/search-occupations?q=${encodeURIComponent(query)}`
+        `${API_ENDPOINTS.persons.occupations}?q=${encodeURIComponent(query)}`
       );
       
       if (response.ok) {
@@ -325,7 +326,7 @@ export default function NewMemberPage() {
 
     try {
       setIsUploading(true);
-      const response = await authenticatedFetch("http://localhost:5000/api/upload/photo", {
+      const response = await authenticatedFetch(API_ENDPOINTS.upload.image, {
         method: "POST",
         body: formData,
       });
@@ -346,7 +347,7 @@ export default function NewMemberPage() {
 
     try {
       setIsLoading(true);
-      const response = await authenticatedFetch("http://localhost:5000/api/persons", {
+      const response = await authenticatedFetch(API_ENDPOINTS.persons.create, {
         method: "POST",
         body: JSON.stringify({
           ...formData,
@@ -709,12 +710,30 @@ export default function NewMemberPage() {
                 id="parent_ids"
                 name="parent_ids"
                 value={formData.parent_ids[0]}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    parent_ids: e.target.value ? [e.target.value] : [],
-                  }))
-                }
+                onChange={(e) => {
+                  const selectedId = e.target.value;
+                  if (!selectedId) {
+                    setFormData((prev) => ({ ...prev, parent_ids: [] }));
+                    return;
+                  }
+                
+                  const selectedParent = eligibleParents.find(p => p._id === selectedId);
+                
+                  if (selectedParent) {
+                    const spouse = selectedParent.spouse_id; // narrow variable
+                    if (spouse && typeof spouse === "object") {
+                      setFormData((prev) => ({
+                        ...prev,
+                        parent_ids: [selectedParent._id, spouse._id],
+                      }));
+                    } else {
+                      setFormData((prev) => ({
+                        ...prev,
+                        parent_ids: [selectedParent._id],
+                      }));
+                    }
+                  }
+                }}
                 disabled={isLoadingParents}
                 className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-foreground shadow-sm focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
               >

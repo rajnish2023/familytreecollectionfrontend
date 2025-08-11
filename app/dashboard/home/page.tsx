@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import { API_ENDPOINTS } from '@/app/config/api';
 import { authenticatedFetch } from "@/app/utils/auth";
 
 type Person = {
@@ -35,7 +36,7 @@ export default function DashboardHome() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    authenticatedFetch("http://localhost:5000/api/persons")
+    authenticatedFetch(API_ENDPOINTS.persons.all)
       .then((res) => res.json())
       .then((data) => {
         if (data.success) setPersons(data.data);
